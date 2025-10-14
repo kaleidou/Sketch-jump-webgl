@@ -6,19 +6,23 @@
     <title>Unity Web Player | Sketch-Jump-main</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <style>
       html, body {
-        margin: 0; padding: 0;
-        height: 100%; width: 100%;
-        background: #111; overflow: hidden;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background: #111;
+        overflow: hidden;
       }
       #unity-container {
-        position: fixed; inset: 0;
-        display: flex; align-items: center; justify-content: center;
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      /* 竖屏 9:16 盒子：高优先，占满视口高度；宽按 9/16 自动 */
       #unity-canvas {
         height: 100vh !important;
         aspect-ratio: 9 / 16 !important;
@@ -31,7 +35,7 @@
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width="1080" height="1920" tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width="1080" height="1920" tabindex="0"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -47,15 +51,23 @@
     </div>
 
     <script>
-      var canvas   = document.querySelector("#unity-canvas");
+      const canvas = document.getElementById('unity-canvas');
+      window.addEventListener('load', () => { try { canvas.focus(); } catch(e) {} });
+      ['pointerdown','mousedown','touchstart','click'].forEach(evt => {
+        window.addEventListener(evt, () => { try { canvas.focus(); } catch(e) {} }, {passive:true});
+      });
+      window.addEventListener('keydown', e => {
+        const k = e.key;
+        if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'ArrowLeft' || k === 'ArrowRight' || k === ' ' || k === 'Spacebar') e.preventDefault();
+      }, {passive:false});
+
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/SketchJump.loader.js";
-
       var config = {
         arguments: [],
-        dataUrl:      buildUrl + "/SketchJump.data.unityweb",
+        dataUrl: buildUrl + "/SketchJump.data.unityweb",
         frameworkUrl: buildUrl + "/SketchJump.framework.js.unityweb",
-        codeUrl:      buildUrl + "/SketchJump.wasm.unityweb",
+        codeUrl: buildUrl + "/SketchJump.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Sketch-Jump-main",
@@ -71,16 +83,15 @@
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
-
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
+        createUnityInstance(canvas, config, progress => {
           document.querySelector("#unity-progress-bar-full").style.width = (100 * progress) + "%";
-        }).then((unityInstance) => {
+        }).then(unityInstance => {
           document.querySelector("#unity-loading-bar").style.display = "none";
           document.querySelector("#unity-fullscreen-button").onclick = () => { unityInstance.SetFullscreen(1); };
-        }).catch((message) => { alert(message); });
+        }).catch(message => { alert(message); });
       };
       document.body.appendChild(script);
     </script>
